@@ -1,0 +1,1184 @@
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MoneyMoney - Sistema de Investimentos</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root {
+            --primary: #3b82f6;
+            --primary-dark: #2563eb;
+            --secondary: #10b981;
+            --secondary-dark: #059669;
+            --accent: #8b5cf6;
+            --danger: #ef4444;
+            --warning: #f59e0b;
+            --dark: #1f2937;
+            --light: #f9fafb;
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+        }
+        
+        body {
+            background-color: #f3f4f6;
+            color: #374151;
+        }
+        
+        .card {
+            background: white;
+            border-radius: 16px;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            overflow: hidden;
+        }
+        
+        .card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+        }
+        
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            padding: 12px 20px;
+            border-radius: 12px;
+            font-weight: 600;
+            font-size: 16px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            border: none;
+            outline: none;
+        }
+        
+        .btn-primary {
+            background-color: var(--primary);
+            color: white;
+        }
+        
+        .btn-primary:hover {
+            background-color: var(--primary-dark);
+            transform: translateY(-1px);
+        }
+        
+        .btn-secondary {
+            background-color: var(--secondary);
+            color: white;
+        }
+        
+        .btn-secondary:hover {
+            background-color: var(--secondary-dark);
+        }
+        
+        .btn-accent {
+            background-color: var(--accent);
+            color: white;
+        }
+        
+        .btn-accent:hover {
+            opacity: 0.9;
+        }
+        
+        .btn-danger {
+            background-color: var(--danger);
+            color: white;
+        }
+        
+        .btn-danger:hover {
+            opacity: 0.9;
+        }
+        
+        .btn-outline {
+            background-color: transparent;
+            border: 2px solid var(--primary);
+            color: var(--primary);
+        }
+        
+        .btn-outline:hover {
+            background-color: var(--primary);
+            color: white;
+        }
+        
+        .status-badge {
+            display: inline-block;
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-size: 14px;
+            font-weight: 600;
+        }
+        
+        .status-pendente {
+            background-color: #fef3c7;
+            color: #92400e;
+        }
+        
+        .status-validado {
+            background-color: #dbeafe;
+            color: #1e40af;
+        }
+        
+        .status-concluido {
+            background-color: #d1fae5;
+            color: #065f46;
+        }
+        
+        .fade-in {
+            animation: fadeIn 0.5s ease-out;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+            z-index: 1000;
+            justify-content: center;
+            align-items: center;
+        }
+        
+        .modal-content {
+            background: white;
+            border-radius: 16px;
+            width: 90%;
+            max-width: 500px;
+            max-height: 90vh;
+            overflow-y: auto;
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+        }
+        
+        .section-title {
+            font-size: 24px;
+            font-weight: 700;
+            color: #111827;
+            margin-bottom: 24px;
+        }
+        
+        .section-subtitle {
+            font-size: 16px;
+            color: #6b7280;
+            margin-bottom: 24px;
+        }
+        
+        .plan-card {
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .plan-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: linear-gradient(90deg, var(--primary), var(--accent));
+        }
+        
+        .referral-card {
+            background: linear-gradient(135deg, #3b82f6, #8b5cf6);
+            color: white;
+        }
+        
+        .referral-card .btn {
+            background-color: white;
+            color: var(--accent);
+            font-weight: 700;
+        }
+        
+        .referral-card .btn:hover {
+            background-color: #f3f4f6;
+        }
+        
+        @media (max-width: 768px) {
+            .modal-content {
+                width: 95%;
+                margin: 20px;
+            }
+            
+            .section-title {
+                font-size: 20px;
+            }
+        }
+        
+        .loading-spinner {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 3px solid rgba(255, 255, 255, 0.3);
+            border-radius: 50%;
+            border-top-color: white;
+            animation: spin 1s ease-in-out infinite;
+        }
+        
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+        
+        .notification {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            padding: 16px 24px;
+            border-radius: 12px;
+            color: white;
+            font-weight: 600;
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+            z-index: 1001;
+            transform: translateX(120%);
+            transition: transform 0.3s ease-out;
+        }
+        
+        .notification.show {
+            transform: translateX(0);
+        }
+        
+        .notification.success {
+            background-color: var(--secondary);
+        }
+        
+        .notification.error {
+            background-color: var(--danger);
+        }
+    </style>
+</head>
+<body>
+    <!-- Notification -->
+    <div id="notification" class="notification"></div>
+
+    <!-- Loading Overlay -->
+    <div id="loadingOverlay" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 hidden">
+        <div class="bg-white rounded-2xl p-8 flex flex-col items-center">
+            <div class="w-16 h-16 border-4 border-blue-500 border-t-transparent rounded-full animate-spin mb-4"></div>
+            <p class="text-gray-700 font-medium">Processando...</p>
+        </div>
+    </div>
+
+    <div id="app">
+        <!-- Login Screen -->
+        <div id="loginScreen" class="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-50 to-indigo-100 p-4">
+            <div class="w-full max-w-md bg-white rounded-2xl shadow-xl p-8 fade-in">
+                <div class="text-center mb-8">
+                    <div class="mx-auto bg-gradient-to-r from-blue-500 to-purple-600 rounded-2xl p-4 w-16 h-16 flex items-center justify-center mb-4">
+                        <i class="fas fa-chart-line text-white text-2xl"></i>
+                    </div>
+                    <h1 class="text-3xl font-bold text-gray-900">MoneyMoney</h1>
+                    <p class="mt-2 text-gray-600">Sistema de Investimentos Profissional</p>
+                </div>
+                
+                <form id="loginForm">
+                    <div class="mb-5">
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Email</label>
+                        <input type="email" id="loginEmail" required 
+                               class="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent transition">
+                    </div>
+                    
+                    <div class="mb-6">
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Senha</label>
+                        <input type="password" id="loginPassword" required 
+                               class="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent transition">
+                    </div>
+                    
+                    <button type="submit" class="w-full btn btn-primary py-3 mb-4">
+                        <span id="loginButtonText">Entrar</span>
+                    </button>
+                </form>
+                
+                <div class="mt-6 text-center">
+                    <button id="showRegister" class="text-blue-600 hover:text-blue-800 font-medium transition">
+                        Não tem conta? Registre-se
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Register Screen -->
+        <div id="registerScreen" class="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-50 to-indigo-100 p-4 hidden">
+            <div class="w-full max-w-md bg-white rounded-2xl shadow-xl p-8 fade-in">
+                <div class="text-center mb-8">
+                    <div class="mx-auto bg-gradient-to-r from-green-500 to-teal-600 rounded-2xl p-4 w-16 h-16 flex items-center justify-center mb-4">
+                        <i class="fas fa-user-plus text-white text-2xl"></i>
+                    </div>
+                    <h1 class="text-3xl font-bold text-gray-900">Registrar</h1>
+                    <p class="mt-2 text-gray-600">Crie sua conta no MoneyMoney</p>
+                </div>
+                
+                <form id="registerForm">
+                    <div class="mb-5">
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Email</label>
+                        <input type="email" id="registerEmail" required 
+                               class="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent transition">
+                    </div>
+                    
+                    <div class="mb-5">
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Senha</label>
+                        <input type="password" id="registerPassword" required 
+                               class="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent transition">
+                    </div>
+                    
+                    <div class="mb-6">
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Código de Convite (Opcional)</label>
+                        <input type="text" id="inviteCode" 
+                               class="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent transition"
+                               placeholder="Digite o código de convite">
+                    </div>
+                    
+                    <button type="submit" class="w-full btn btn-primary py-3 mb-4">
+                        <span id="registerButtonText">Registrar</span>
+                    </button>
+                </form>
+                
+                <div class="mt-6 text-center">
+                    <button id="showLogin" class="text-blue-600 hover:text-blue-800 font-medium transition">
+                        Já tem conta? Faça login
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- User Dashboard -->
+        <div id="userDashboard" class="hidden">
+            <!-- Header -->
+            <header class="bg-white shadow-sm sticky top-0 z-10">
+                <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                    <div class="flex justify-between h-16 items-center">
+                        <div class="flex items-center">
+                            <div class="bg-gradient-to-r from-blue-500 to-purple-600 rounded-xl p-2 mr-3">
+                                <i class="fas fa-chart-line text-white text-xl"></i>
+                            </div>
+                            <h1 class="text-xl font-bold text-gray-900">MoneyMoney</h1>
+                        </div>
+                        
+                        <div class="flex items-center space-x-4">
+                            <span id="userEmail" class="text-gray-700 hidden sm:block"></span>
+                            <button id="logoutBtn" class="btn btn-danger py-2 px-4">
+                                <i class="fas fa-sign-out-alt mr-2"></i>Sair
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </header>
+
+            <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+                <!-- Financial Summary -->
+                <div class="card p-6 mb-8">
+                    <h2 class="section-title">Resumo Financeiro</h2>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div class="bg-gradient-to-r from-blue-50 to-indigo-50 rounded-xl p-6">
+                            <div class="flex items-center">
+                                <div class="bg-blue-100 rounded-xl p-3 mr-4">
+                                    <i class="fas fa-wallet text-blue-600 text-xl"></i>
+                                </div>
+                                <div>
+                                    <p class="text-sm text-gray-600">Saldo de Investimento</p>
+                                    <p id="saldoInvestimento" class="text-2xl font-bold text-gray-900">0 Kz</p>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="bg-gradient-to-r from-green-50 to-teal-50 rounded-xl p-6">
+                            <div class="flex items-center">
+                                <div class="bg-green-100 rounded-xl p-3 mr-4">
+                                    <i class="fas fa-gift text-green-600 text-xl"></i>
+                                </div>
+                                <div>
+                                    <p class="text-sm text-gray-600">Ganhos por Convite</p>
+                                    <p id="referralEarnings" class="text-2xl font-bold text-gray-900">0 Kz</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Referral Section -->
+                <div class="card referral-card p-6 mb-8">
+                    <h2 class="text-xl font-bold text-white mb-4">Convite de Amigos</h2>
+                    <p class="text-blue-100 mb-4">Ganhe 100 Kz para cada amigo que se cadastrar usando seu link exclusivo!</p>
+                    <div class="flex flex-col sm:flex-row gap-3">
+                        <input type="text" id="referralLink" readonly 
+                               class="flex-1 px-4 py-3 rounded-xl text-gray-900 bg-white bg-opacity-90">
+                        <button id="copyReferralLink" class="btn py-3">
+                            <i class="fas fa-copy mr-2"></i>Copiar Link
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Investment Plans -->
+                <div class="card p-6 mb-8">
+                    <h2 class="section-title">Planos de Investimento</h2>
+                    <p class="section-subtitle">Escolha o melhor plano para você</p>
+                    
+                    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                        <!-- Plan Cards will be generated here -->
+                    </div>
+                </div>
+
+                <!-- User Investments -->
+                <div class="card p-6">
+                    <h2 class="section-title">Meus Investimentos</h2>
+                    <div id="investmentsList" class="space-y-4">
+                        <!-- Investments will be listed here -->
+                    </div>
+                </div>
+            </main>
+        </div>
+
+        <!-- Admin Dashboard -->
+        <div id="adminDashboard" class="hidden">
+            <!-- Header -->
+            <header class="bg-white shadow-sm sticky top-0 z-10">
+                <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                    <div class="flex justify-between h-16 items-center">
+                        <div class="flex items-center">
+                            <div class="bg-gradient-to-r from-purple-500 to-pink-600 rounded-xl p-2 mr-3">
+                                <i class="fas fa-crown text-white text-xl"></i>
+                            </div>
+                            <h1 class="text-xl font-bold text-gray-900">MoneyMoney - Admin</h1>
+                        </div>
+                        
+                        <div class="flex items-center space-x-4">
+                            <span id="adminEmail" class="text-gray-700 hidden sm:block"></span>
+                            <button id="adminLogoutBtn" class="btn btn-danger py-2 px-4">
+                                <i class="fas fa-sign-out-alt mr-2"></i>Sair
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </header>
+
+            <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+                <div class="card p-6">
+                    <h2 class="section-title">Investimentos Pendentes</h2>
+                    <div id="pendingInvestments" class="space-y-4">
+                        <!-- Pending investments will be listed here -->
+                    </div>
+                </div>
+            </main>
+        </div>
+    </div>
+
+    <!-- Deposit Modal -->
+    <div id="depositModal" class="modal">
+        <div class="modal-content p-6">
+            <div class="flex justify-between items-center mb-6">
+                <h3 class="text-xl font-bold text-gray-900">Instruções de Depósito</h3>
+                <button id="closeDepositModal" class="text-gray-500 hover:text-gray-700">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            
+            <div class="space-y-6">
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">IBAN para Depósito</label>
+                    <div class="flex flex-col sm:flex-row gap-2">
+                        <input type="text" id="ibanValue" value="AO06005500007188572310181" 
+                               class="flex-1 px-4 py-3 border border-gray-300 rounded-xl bg-gray-50 font-mono text-sm" readonly>
+                        <button id="copyIban" class="btn btn-primary whitespace-nowrap">
+                            <i class="fas fa-copy mr-2"></i>Copiar IBAN
+                        </button>
+                    </div>
+                </div>
+                
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Detalhes do Plano</label>
+                    <div class="bg-gray-50 rounded-xl p-4 space-y-3">
+                        <div class="flex justify-between">
+                            <span class="text-gray-600">Valor do Plano:</span>
+                            <span id="planoValor" class="font-medium">0 Kz</span>
+                        </div>
+                        <div class="flex justify-between">
+                            <span class="text-gray-600">Retorno Esperado:</span>
+                            <span id="planoRetorno" class="font-medium text-green-600">0 Kz</span>
+                        </div>
+                        <div class="flex justify-between">
+                            <span class="text-gray-600">Prazo:</span>
+                            <span id="planoPrazo" class="font-medium">0 dias</span>
+                        </div>
+                    </div>
+                </div>
+                
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Comprovativo de Depósito</label>
+                    <input type="file" id="comprovativoFile" accept=".jpg,.jpeg,.png,.pdf" 
+                           class="w-full px-4 py-3 border border-gray-300 rounded-xl">
+                    <p class="text-sm text-gray-500 mt-1">Formatos aceitos: JPG, PNG, PDF (máx. 5MB)</p>
+                </div>
+                
+                <div class="flex flex-col sm:flex-row gap-3">
+                    <button id="confirmDeposit" class="btn btn-secondary flex-1 py-3">
+                        <i class="fas fa-check-circle mr-2"></i>Confirmar Depósito
+                    </button>
+                    <button id="cancelDeposit" class="btn btn-danger py-3">
+                        <i class="fas fa-times mr-2"></i>Cancelar
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // State management
+        const state = {
+            finance: {
+                saldoInvestimento: 0
+            },
+            currentUser: null,
+            isAdmin: false,
+            selectedPlan: null,
+            investments: [],
+            pendingInvestments: [],
+            referralEarnings: 0
+        };
+
+        // Investment plans
+        const investmentPlans = [
+            { id: 1, investimento: 3500, retorno: 9000, prazo: 7 },
+            { id: 2, investimento: 8000, retorno: 17200, prazo: 10 },
+            { id: 3, investimento: 15000, retorno: 37500, prazo: 10 },
+            { id: 4, investimento: 35000, retorno: 47850, prazo: 3 },
+            { id: 5, investimento: 55000, retorno: 113400, prazo: 15 },
+            { id: 6, investimento: 25000, retorno: 87000, prazo: 30 }
+        ];
+
+        // DOM Elements
+        const loginScreen = document.getElementById('loginScreen');
+        const registerScreen = document.getElementById('registerScreen');
+        const userDashboard = document.getElementById('userDashboard');
+        const adminDashboard = document.getElementById('adminDashboard');
+        const loginForm = document.getElementById('loginForm');
+        const registerForm = document.getElementById('registerForm');
+        const showRegister = document.getElementById('showRegister');
+        const showLogin = document.getElementById('showLogin');
+        const logoutBtn = document.getElementById('logoutBtn');
+        const adminLogoutBtn = document.getElementById('adminLogoutBtn');
+        const depositModal = document.getElementById('depositModal');
+        const loadingOverlay = document.getElementById('loadingOverlay');
+        const notification = document.getElementById('notification');
+
+        // Supabase configuration
+const supabaseUrl = 'https://rolnypzseepmirmaeiyn.supabase.co';
+const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJvbG55cHpzZWVwbWlybWFlaXluIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjA5ODYyOTYsImV4cCI6MjA3NjU2MjI5Nn0.6qg4qGyvEHMg14HoC8ijf0jYKqJ84flkeJT1Y4h4U90';
+let supabase;
+
+// Initialize Supabase (correção mínima)
+function initSupabase() {
+    try {
+        // usar window.supabase para evitar sobrescrever a variável antes dela existir
+        supabase = window.supabase.createClient(supabaseUrl, supabaseKey);
+    } catch (error) {
+        console.error('Erro ao inicializar Supabase:', error);
+    }
+}
+
+
+        // Show loading overlay
+        function showLoading(message = 'Processando...') {
+            document.querySelector('#loadingOverlay p').textContent = message;
+            loadingOverlay.classList.remove('hidden');
+        }
+
+        // Hide loading overlay
+        function hideLoading() {
+            loadingOverlay.classList.add('hidden');
+        }
+
+        // Show notification
+        function showNotification(message, type = 'success') {
+            notification.textContent = message;
+            notification.className = `notification ${type} show`;
+            
+            setTimeout(() => {
+                notification.classList.remove('show');
+            }, 3000);
+        }
+
+        // Event Listeners
+        showRegister.addEventListener('click', () => {
+            loginScreen.classList.add('hidden');
+            registerScreen.classList.remove('hidden');
+        });
+
+        showLogin.addEventListener('click', () => {
+            registerScreen.classList.add('hidden');
+            loginScreen.classList.remove('hidden');
+        });
+
+        loginForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            showLoading('Autenticando...');
+            
+            const email = document.getElementById('loginEmail').value;
+            const password = document.getElementById('loginPassword').value;
+            
+            try {
+                const { data, error } = await supabase.auth.signInWithPassword({
+                    email,
+                    password
+                });
+                
+                if (error) throw error;
+                
+                state.currentUser = data.user;
+                await loadUserData();
+                
+                if (email === 'admin@moneymoney.com') {
+                    state.isAdmin = true;
+                    showAdminDashboard();
+                } else {
+                    state.isAdmin = false;
+                    showUserDashboard();
+                }
+            } catch (error) {
+                showNotification('Erro ao fazer login: ' + error.message, 'error');
+            } finally {
+                hideLoading();
+            }
+        });
+
+        registerForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            showLoading('Registrando...');
+            
+            const email = document.getElementById('registerEmail').value;
+            const password = document.getElementById('registerPassword').value;
+            const inviteCode = document.getElementById('inviteCode').value;
+            
+            try {
+                const { data, error } = await supabase.auth.signUp({
+                    email,
+                    password
+                });
+                
+                if (error) throw error;
+                
+                // Create user in database
+                const { error: dbError } = await supabase
+                    .from('users')
+                    .insert([{ 
+                        id: data.user.id,
+                        email: email,
+                        senha: password,
+                        saldoInvestimento: 0,
+                        referral_code: generateReferralCode(),
+                        referred_by: inviteCode || null
+                    }]);
+                
+                if (dbError) throw dbError;
+                
+                // Process referral bonus if applicable
+                if (inviteCode) {
+                    await processReferralBonus(inviteCode, data.user.id);
+                }
+                
+                showNotification('Registro realizado com sucesso! Faça login.');
+                registerScreen.classList.add('hidden');
+                loginScreen.classList.remove('hidden');
+            } catch (error) {
+                showNotification('Erro ao registrar: ' + error.message, 'error');
+            } finally {
+                hideLoading();
+            }
+        });
+
+        logoutBtn.addEventListener('click', async () => {
+            showLoading('Saindo...');
+            await supabase.auth.signOut();
+            state.currentUser = null;
+            userDashboard.classList.add('hidden');
+            loginScreen.classList.remove('hidden');
+            hideLoading();
+        });
+
+        adminLogoutBtn.addEventListener('click', async () => {
+            showLoading('Saindo...');
+            await supabase.auth.signOut();
+            state.currentUser = null;
+            state.isAdmin = false;
+            adminDashboard.classList.add('hidden');
+            loginScreen.classList.remove('hidden');
+            hideLoading();
+        });
+
+        document.getElementById('copyIban').addEventListener('click', () => {
+            const ibanInput = document.getElementById('ibanValue');
+            ibanInput.select();
+            document.execCommand('copy');
+            showNotification('IBAN copiado para a área de transferência!');
+        });
+
+        document.getElementById('copyReferralLink').addEventListener('click', () => {
+            const referralInput = document.getElementById('referralLink');
+            referralInput.select();
+            document.execCommand('copy');
+            showNotification('Link de convite copiado!');
+        });
+
+        document.getElementById('closeDepositModal').addEventListener('click', () => {
+            depositModal.style.display = 'none';
+            state.selectedPlan = null;
+        });
+
+        document.getElementById('cancelDeposit').addEventListener('click', () => {
+            depositModal.style.display = 'none';
+            state.selectedPlan = null;
+        });
+
+        document.getElementById('confirmDeposit').addEventListener('click', async () => {
+            const fileInput = document.getElementById('comprovativoFile');
+            if (!fileInput.files.length) {
+                showNotification('Por favor, selecione um comprovativo.', 'error');
+                return;
+            }
+
+            showLoading('Enviando comprovativo...');
+            
+            try {
+                // Upload file to Supabase Storage
+                const file = fileInput.files[0];
+                const fileName = `${state.currentUser.id}_${Date.now()}_${file.name}`;
+                
+                const { data: uploadData, error: uploadError } = await supabase
+                    .storage
+                    .from('comprovativos')
+                    .upload(fileName, file);
+                
+                if (uploadError) throw uploadError;
+                
+                // Get public URL
+                const { data: urlData } = supabase
+                    .storage
+                    .from('comprovativos')
+                    .getPublicUrl(fileName);
+                
+                // Save investment to database
+                const plano = investmentPlans.find(p => p.id === state.selectedPlan.id);
+                const startDate = new Date();
+                const endDate = new Date();
+                endDate.setDate(startDate.getDate() + plano.prazo);
+                
+                const { error: insertError } = await supabase
+                    .from('investimentos')
+                    .insert([{
+                        user_id: state.currentUser.id,
+                        plano: plano.id,
+                        valor: plano.investimento,
+                        retorno: plano.retorno,
+                        prazo: plano.prazo,
+                        comprovativo_url: urlData.publicUrl,
+                        status: 'Pendente',
+                        data_inicio: startDate.toISOString(),
+                        data_fim: endDate.toISOString()
+                    }]);
+                
+                if (insertError) throw insertError;
+                
+                // Add transaction
+                await supabase
+                    .from('transacoes')
+                    .insert([{
+                        user_id: state.currentUser.id,
+                        tipo: 'Depósito',
+                        valor: plano.investimento,
+                        data: new Date().toISOString()
+                    }]);
+                
+                showNotification('Depósito registrado com sucesso! Aguarde a validação.');
+                depositModal.style.display = 'none';
+                state.selectedPlan = null;
+                loadInvestments();
+            } catch (error) {
+                showNotification('Erro ao registrar depósito: ' + error.message, 'error');
+            } finally {
+                hideLoading();
+            }
+        });
+
+        // Helper functions
+        function generateReferralCode() {
+            return 'MM' + Math.random().toString(36).substr(2, 8).toUpperCase();
+        }
+
+        async function processReferralBonus(referralCode, newUser_id) {
+            try {
+                // Find the referrer
+                const { data: referrerData, error: referrerError } = await supabase
+                    .from('users')
+                    .select('id, saldoInvestimento')
+                    .eq('referral_code', referralCode)
+                    .single();
+                
+                if (referrerError || !referrerData) return;
+                
+                // Update referrer's balance
+                const newBalance = (referrerData.saldoInvestimento || 0) + 100;
+                
+                await supabase
+                    .from('users')
+                    .update({ saldoInvestimento: newBalance })
+                    .eq('id', referrerData.id);
+                
+                // Record the referral transaction
+                await supabase
+                    .from('transacoes')
+                    .insert([{
+                        user_id: referrerData.id,
+                        tipo: 'Bônus de Convite',
+                        valor: 100,
+                        data: new Date().toISOString()
+                    }]);
+                
+                // Record the referral relationship
+                await supabase
+                    .from('referrals')
+                    .insert([{
+                        referrer_id: referrerData.id,
+                        referred_id: newUser_id,
+                        bonus_amount: 100,
+                        date_created: new Date().toISOString()
+                    }]);
+                    
+            } catch (error) {
+                console.error('Erro ao processar bônus de convite:', error);
+            }
+        }
+
+        // Main functions
+        function showUserDashboard() {
+            loginScreen.classList.add('hidden');
+            document.getElementById('userEmail').textContent = state.currentUser.email;
+            
+            // Set referral link
+            const referralLink = `${window.location.origin}?ref=${state.currentUser.id.substring(0, 8)}`;
+            document.getElementById('referralLink').value = referralLink;
+            
+            updateFinanceDisplay();
+            renderInvestmentPlans();
+            loadInvestments();
+            userDashboard.classList.remove('hidden');
+        }
+
+        function showAdminDashboard() {
+            loginScreen.classList.add('hidden');
+            document.getElementById('adminEmail').textContent = state.currentUser.email;
+            loadPendingInvestments();
+            adminDashboard.classList.remove('hidden');
+        }
+
+        async function loadUserData() {
+            try {
+                const { data, error } = await supabase
+                    .from('users')
+                    .select('saldoInvestimento')
+                    .eq('id', state.currentUser.id)
+                    .single();
+                
+                if (error) throw error;
+                
+                state.finance.saldoInvestimento = data.saldoInvestimento || 0;
+                
+                // Load referral earnings
+                const { data: referralData, error: referralError } = await supabase
+                    .from('transacoes')
+                    .select('valor')
+                    .eq('user_id', state.currentUser.id)
+                    .eq('tipo', 'Bônus de Convite');
+                
+                if (!referralError && referralData) {
+                    state.referralEarnings = referralData.reduce((sum, t) => sum + (t.valor || 0), 0);
+                }
+            } catch (error) {
+                console.error('Erro ao carregar dados do usuário:', error);
+            }
+        }
+
+        function updateFinanceDisplay() {
+            document.getElementById('saldoInvestimento').textContent = 
+                `${parseFloat(state.finance.saldoInvestimento).toLocaleString('pt-AO')} Kz`;
+            document.getElementById('referralEarnings').textContent = 
+                `${parseFloat(state.referralEarnings).toLocaleString('pt-AO')} Kz`;
+        }
+
+        function renderInvestmentPlans() {
+            const container = document.querySelector('#userDashboard .grid');
+            container.innerHTML = '';
+            
+            investmentPlans.forEach(plan => {
+                const card = document.createElement('div');
+                card.className = 'card plan-card p-6';
+                card.innerHTML = `
+                    <div class="mb-4">
+                        <h3 class="text-lg font-bold text-gray-900">Plano ${plan.id}</h3>
+                    </div>
+                    <div class="space-y-3 mb-6">
+                        <div class="flex justify-between">
+                            <span class="text-gray-600">Investimento:</span>
+                            <span class="font-medium">${parseFloat(plan.investimento).toLocaleString('pt-AO')} Kz</span>
+                        </div>
+                        <div class="flex justify-between">
+                            <span class="text-gray-600">Retorno:</span>
+                            <span class="font-medium text-green-600">${parseFloat(plan.retorno).toLocaleString('pt-AO')} Kz</span>
+                        </div>
+                        <div class="flex justify-between">
+                            <span class="text-gray-600">Prazo:</span>
+                            <span class="font-medium">${plan.prazo} dias</span>
+                        </div>
+                    </div>
+                    <button onclick="selectPlan(${plan.id})" class="btn btn-primary w-full py-3">
+                        <i class="fas fa-arrow-up-from-bracket mr-2"></i>Investir agora
+                    </button>
+                `;
+                container.appendChild(card);
+            });
+        }
+
+        async function selectPlan(planId) {
+            const plan = investmentPlans.find(p => p.id === planId);
+            state.selectedPlan = plan;
+            
+            document.getElementById('planoValor').textContent = `${parseFloat(plan.investimento).toLocaleString('pt-AO')} Kz`;
+            document.getElementById('planoRetorno').textContent = `${parseFloat(plan.retorno).toLocaleString('pt-AO')} Kz`;
+            document.getElementById('planoPrazo').textContent = `${plan.prazo} dias`;
+            
+            depositModal.style.display = 'flex';
+        }
+
+        async function loadInvestments() {
+            try {
+                const { data, error } = await supabase
+                    .from('investimentos')
+                    .select('*')
+                    .eq('user_id', state.currentUser.id)
+                    .order('data_inicio', { ascending: false });
+                
+                if (error) throw error;
+                
+                state.investments = data || [];
+                renderInvestments();
+            } catch (error) {
+                console.error('Erro ao carregar investimentos:', error);
+            }
+        }
+
+        function renderInvestments() {
+            const container = document.getElementById('investmentsList');
+            container.innerHTML = '';
+            
+            if (!state.investments || state.investments.length === 0) {
+                container.innerHTML = `
+                    <div class="text-center py-12">
+                        <i class="fas fa-chart-pie text-gray-300 text-4xl mb-4"></i>
+                        <p class="text-gray-500">Nenhum investimento encontrado.</p>
+                        <p class="text-gray-400 text-sm mt-2">Comece investindo em um dos planos acima</p>
+                    </div>
+                `;
+                return;
+            }
+            
+            state.investments.forEach(inv => {
+                const item = document.createElement('div');
+                item.className = 'border rounded-xl p-5 hover:shadow-md transition';
+                item.innerHTML = `
+                    <div class="flex flex-wrap justify-between items-start mb-4">
+                        <h3 class="font-bold text-lg">Plano ${inv.plano}</h3>
+                        <span class="status-badge status-${inv.status.toLowerCase()}">
+                            ${inv.status}
+                        </span>
+                    </div>
+                    <div class="grid grid-cols-2 gap-3 mb-4 text-sm">
+                        <div>
+                            <span class="text-gray-600">Valor:</span>
+                            <span class="font-medium ml-1">${parseFloat(inv.valor).toLocaleString('pt-AO')} Kz</span>
+                        </div>
+                        <div>
+                            <span class="text-gray-600">Retorno:</span>
+                            <span class="font-medium text-green-600 ml-1">${parseFloat(inv.retorno).toLocaleString('pt-AO')} Kz</span>
+                        </div>
+                        <div>
+                            <span class="text-gray-600">Prazo:</span>
+                            <span class="font-medium ml-1">${inv.prazo} dias</span>
+                        </div>
+                        <div>
+                            <span class="text-gray-600">Início:</span>
+                            <span class="font-medium ml-1">${new Date(inv.data_inicio).toLocaleDateString('pt-AO')}</span>
+                        </div>
+                    </div>
+                    ${inv.comprovativo_url ? `
+                        <div class="mt-3">
+                            <a href="${inv.comprovativo_url}" target="_blank" class="text-blue-600 hover:text-blue-800 text-sm">
+                                <i class="fas fa-file-invoice mr-1"></i>Ver Comprovativo
+                            </a>
+                        </div>
+                    ` : ''}
+                `;
+                container.appendChild(item);
+            });
+        }
+
+        async function loadPendingInvestments() {
+            try {
+                const { data, error } = await supabase
+                    .from('investimentos')
+                    .select('*, users(email)')
+                    .eq('status', 'Pendente')
+                    .order('data_inicio', { ascending: false });
+                
+                if (error) throw error;
+                
+                state.pendingInvestments = data || [];
+                renderPendingInvestments();
+            } catch (error) {
+                console.error('Erro ao carregar investimentos pendentes:', error);
+            }
+        }
+
+        function renderPendingInvestments() {
+            const container = document.getElementById('pendingInvestments');
+            container.innerHTML = '';
+            
+            if (!state.pendingInvestments || state.pendingInvestments.length === 0) {
+                container.innerHTML = `
+                    <div class="text-center py-12">
+                        <i class="fas fa-check-circle text-gray-300 text-4xl mb-4"></i>
+                        <p class="text-gray-500">Nenhum investimento pendente.</p>
+                    </div>
+                `;
+                return;
+            }
+            
+            state.pendingInvestments.forEach(inv => {
+                const item = document.createElement('div');
+                item.className = 'border rounded-xl p-5 hover:shadow-md transition';
+                item.innerHTML = `
+                    <div class="flex flex-wrap justify-between items-start mb-4">
+                        <h3 class="font-bold text-lg">Plano ${inv.plano} - ${inv.users?.email || 'Usuário'}</h3>
+                        <span class="status-badge status-${inv.status.toLowerCase()}">
+                            ${inv.status}
+                        </span>
+                    </div>
+                    <div class="grid grid-cols-2 gap-3 mb-4 text-sm">
+                        <div>
+                            <span class="text-gray-600">Valor:</span>
+                            <span class="font-medium ml-1">${parseFloat(inv.valor).toLocaleString('pt-AO')} Kz</span>
+                        </div>
+                        <div>
+                            <span class="text-gray-600">Retorno:</span>
+                            <span class="font-medium text-green-600 ml-1">${parseFloat(inv.retorno).toLocaleString('pt-AO')} Kz</span>
+                        </div>
+                        <div>
+                            <span class="text-gray-600">Prazo:</span>
+                            <span class="font-medium ml-1">${inv.prazo} dias</span>
+                        </div>
+                        <div>
+                            <span class="text-gray-600">Início:</span>
+                            <span class="font-medium ml-1">${new Date(inv.data_inicio).toLocaleDateString('pt-AO')}</span>
+                        </div>
+                    </div>
+                    <div class="flex flex-wrap gap-2 mt-4">
+                        <a href="${inv.comprovativo_url}" target="_blank" class="btn btn-primary text-sm py-2 px-4">
+                            <i class="fas fa-file-invoice mr-1"></i>Ver Comprovativo
+                        </a>
+                        <button onclick="updateInvestmentStatus('${inv.id}', 'Validado')" class="btn btn-warning text-sm py-2 px-4">
+                            <i class="fas fa-check mr-1"></i>Validar
+                        </button>
+                        <button onclick="updateInvestmentStatus('${inv.id}', 'Concluido')" class="btn btn-secondary text-sm py-2 px-4">
+                            <i class="fas fa-flag-checkered mr-1"></i>Concluir
+                        </button>
+                    </div>
+                `;
+                container.appendChild(item);
+            });
+        }
+
+        async function updateInvestmentStatus(investmentId, newStatus) {
+            showLoading(`Atualizando status para ${newStatus}...`);
+            
+            try {
+                if (newStatus === 'Concluido') {
+                    // Get investment details
+                    const { data: invData, error: invError } = await supabase
+                        .from('investimentos')
+                        .select('user_id, retorno')
+                        .eq('id', investmentId)
+                        .single();
+                    
+                    if (invError) throw invError;
+                    
+                    // Update user balance
+                    const { data: userData, error: userError } = await supabase
+                        .from('users')
+                        .select('saldoInvestimento')
+                        .eq('id', invData.user_id)
+                        .single();
+                    
+                    if (userError) throw userError;
+                    
+                    const currentBalance = userData.saldoInvestimento || 0;
+                    const newBalance = parseFloat(currentBalance) + parseFloat(invData.retorno);
+                    
+                    const { error: updateError } = await supabase
+                        .from('users')
+                        .update({ saldoInvestimento: newBalance })
+                        .eq('id', invData.user_id);
+                    
+                    if (updateError) throw updateError;
+                    
+                    // Add transaction
+                    await supabase
+                        .from('transacoes')
+                        .insert([{
+                            user_id: invData.user_id,
+                            tipo: 'Retorno de Investimento',
+                            valor: invData.retorno,
+                            data: new Date().toISOString()
+                        }]);
+                }
+                
+                // Update investment status
+                const { error } = await supabase
+                    .from('investimentos')
+                    .update({ status: newStatus })
+                    .eq('id', investmentId);
+                
+                if (error) throw error;
+                
+                showNotification(`Investimento ${newStatus.toLowerCase()} com sucesso!`);
+                loadPendingInvestments();
+            } catch (error) {
+                showNotification('Erro ao atualizar status: ' + error.message, 'error');
+            } finally {
+                hideLoading();
+            }
+        }
+
+        // Initialize the app
+        window.selectPlan = selectPlan;
+        window.updateInvestmentStatus = updateInvestmentStatus;
+
+        // Check for referral code in URL
+        window.addEventListener('DOMContentLoaded', () => {
+            initSupabase();
+            
+            const urlParams = new URLSearchParams(window.location.search);
+            const refCode = urlParams.get('ref');
+            if (refCode) {
+                document.getElementById('inviteCode').value = refCode;
+            }
+        });
+    </script>
+</body>
+</html>
