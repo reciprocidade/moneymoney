@@ -375,6 +375,399 @@
             </header>
 
             <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+                <!-- Financial Summary -->
+                <div class="card p-6 mb-8">
+                    <h2 class="section-title">Resumo Financeiro</h2>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div class="bg-gradient-to-r from-blue-50 to-indigo-50 rounded-xl p-6">
+                            <div class="flex items-center">
+                                <div class="bg-blue-100 rounded-xl p-3 mr-4">
+                                    <i class="fas fa-wallet text-blue-600 text-xl"></i>
+                                </div>
+                                <div>
+                                    <p class="text-sm text-gray-600">Saldo de Investimento</p>
+                                    <p id="saldoInvestimento" class="text-2xl font-bold text-gray-900">0 Kz</p>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="bg-gradient-to-r from-green-50 to-teal-50 rounded-xl p-6">
+                            <div class="flex items-center">
+                                <div class="bg-green-100 rounded-xl p-3 mr-4">
+                                    <i class="fas fa-gift text-green-600 text-xl"></i>
+                                </div>
+                                <div>
+                                    <p class="text-sm text-gray-600">Ganhos por Convite</p>
+                                    <p id="referralEarnings" class="text-2xl font-bold text-gray-900">0 Kz</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Referral Section -->
+                <div class="card referral-card p-6 mb-8">
+                    <h2 class="text-xl font-bold text-white mb-4">Convite de Amigos</h2>
+                    <p class="text-blue-100 mb-4">Ganhe 100 Kz para cada amigo que se cadastrar usando seu link exclusivo!</p>
+                    <div class="flex flex-col sm:flex-row gap-3">
+                        <input type="text" id="referralLink" readonly 
+                               class="flex-1 px-4 py-3 rounded-xl text-gray-900 bg-white bg-opacity-90">
+                        <button id="copyReferralLink" class="btn py-3">
+                            <i class="fas fa-copy mr-2"></i>Copiar Link
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Investment Plans -->
+                <div class="card p-6 mb-8">
+                    <h2 class="section-title">Planos de Investimento</h2>
+                    <p class="section-subtitle">Escolha o melhor plano para você</p>
+                    
+                    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                        <!-- Plan Cards will be generated here -->
+                    </div>
+                </div>
+
+                <!-- User Investments -->
+                <div class="card p-6">
+                    <h2 class="section-title">Meus Investimentos</h2>
+                    <div id="investmentsList" class="space-y-4">
+                        <!-- Investments will be listed here -->
+                    </div>
+                </div>
+            </main>
+        </div>
+
+        <!-- Admin Dashboard -->
+        <div id="adminDashboard" class="hidden">
+            <!-- Header -->
+            <header class="bg-white shadow-sm sticky top-0 z-10">
+                <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                    <div class="flex justify-between h-16 items-center">
+                        <div class="flex items-center">
+                            <div class="bg-gradient-to-r from-purple-500 to-pink-600 rounded-xl p-2 mr-3">
+                                <i class="fas fa-crown text-white text-xl"></i>
+                            </div>
+                            <h1 class="text-xl font-bold text-gray-900">MoneyMoney - Admin</h1>
+                        </div>
+                        
+                        <div class="flex items-center space-x-4">
+                            <span id="adminEmail" class="text-gray-700 hidden sm:block"></span>
+                            <button id="adminLogoutBtn" class="btn btn-danger py-2 px-4">
+                                <i class="fas fa-sign-out-alt mr-2"></i>Sair
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </header>
+
+            <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+                <div class="card p-6">
+                    <h2 class="section-title">Investimentos Pendentes</h2>
+                    <div id="pendingInvestments" class="space-y-4">
+                        <!-- Pending investments will be listed here -->
+                    </div>
+                </div>
+            </main>
+        </div>
+    </div>
+
+    <!-- Deposit Modal -->
+    <div id="depositModal" class="modal">
+        <div class="modal-content p-6">
+            <div class="flex justify-between items-center mb-6">
+                <h3 class="text-xl font-bold text-gray-900">Instruções de Depósito</h3>
+                <button id="closeDepositModal" class="text-gray-500 hover:text-gray-700">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            
+            <div class="space-y-6">
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">IBAN para Depósito</label>
+                    <div class="flex flex-col sm:flex-row gap-2">
+                        <input type="text" id="ibanValue" value="AO06005500007188572310181" 
+                               class="flex-1 px-4 py-3 border border-gray-300 rounded-xl bg-gray-50 font-mono text-sm" readonly>
+                        <button id="copyIban" class="btn btn-primary whitespace-nowrap">
+                            <i class="fas fa-copy mr-2"></i>Copiar IBAN
+                        </button>
+                    </div>
+                </div>
+                
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Detalhes do Plano</label>
+                    <div class="bg-gray-50 rounded-xl p-4 spa            background-color: var(--primary);
+            color: white;
+        }
+        
+        .status-badge {
+            display: inline-block;
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-size: 14px;
+            font-weight: 600;
+        }
+        
+        .status-pendente {
+            background-color: #fef3c7;
+            color: #92400e;
+        }
+        
+        .status-validado {
+            background-color: #dbeafe;
+            color: #1e40af;
+        }
+        
+        .status-concluido {
+            background-color: #d1fae5;
+            color: #065f46;
+        }
+        
+        .fade-in {
+            animation: fadeIn 0.5s ease-out;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+            z-index: 1000;
+            justify-content: center;
+            align-items: center;
+        }
+        
+        .modal-content {
+            background: white;
+            border-radius: 16px;
+            width: 90%;
+            max-width: 500px;
+            max-height: 90vh;
+            overflow-y: auto;
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+        }
+        
+        .section-title {
+            font-size: 24px;
+            font-weight: 700;
+            color: #111827;
+            margin-bottom: 24px;
+        }
+        
+        .section-subtitle {
+            font-size: 16px;
+            color: #6b7280;
+            margin-bottom: 24px;
+        }
+        
+        .plan-card {
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .plan-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: linear-gradient(90deg, var(--primary), var(--accent));
+        }
+        
+        .referral-card {
+            background: linear-gradient(135deg, #3b82f6, #8b5cf6);
+            color: white;
+        }
+        
+        .referral-card .btn {
+            background-color: white;
+            color: var(--accent);
+            font-weight: 700;
+        }
+        
+        .referral-card .btn:hover {
+            background-color: #f3f4f6;
+        }
+        
+        @media (max-width: 768px) {
+            .modal-content {
+                width: 95%;
+                margin: 20px;
+            }
+            
+            .section-title {
+                font-size: 20px;
+            }
+        }
+        
+        .loading-spinner {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 3px solid rgba(255, 255, 255, 0.3);
+            border-radius: 50%;
+            border-top-color: white;
+            animation: spin 1s ease-in-out infinite;
+        }
+        
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+        
+        .notification {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            padding: 16px 24px;
+            border-radius: 12px;
+            color: white;
+            font-weight: 600;
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+            z-index: 1001;
+            transform: translateX(120%);
+            transition: transform 0.3s ease-out;
+        }
+        
+        .notification.show {
+            transform: translateX(0);
+        }
+        
+        .notification.success {
+            background-color: var(--secondary);
+        }
+        
+        .notification.error {
+            background-color: var(--danger);
+        }
+    </style>
+</head>
+<body>
+    <!-- Notification -->
+    <div id="notification" class="notification"></div>
+
+    <!-- Loading Overlay -->
+    <div id="loadingOverlay" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 hidden">
+        <div class="bg-white rounded-2xl p-8 flex flex-col items-center">
+            <div class="w-16 h-16 border-4 border-blue-500 border-t-transparent rounded-full animate-spin mb-4"></div>
+            <p class="text-gray-700 font-medium">Processando...</p>
+        </div>
+    </div>
+
+    <div id="app">
+        <!-- Login Screen -->
+        <div id="loginScreen" class="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-50 to-indigo-100 p-4">
+            <div class="w-full max-w-md bg-white rounded-2xl shadow-xl p-8 fade-in">
+                <div class="text-center mb-8">
+                    <div class="mx-auto bg-gradient-to-r from-blue-500 to-purple-600 rounded-2xl p-4 w-16 h-16 flex items-center justify-center mb-4">
+                        <i class="fas fa-chart-line text-white text-2xl"></i>
+                    </div>
+                    <h1 class="text-3xl font-bold text-gray-900">MoneyMoney</h1>
+                    <p class="mt-2 text-gray-600">Sistema de Investimentos Profissional</p>
+                </div>
+                
+                <form id="loginForm">
+                    <div class="mb-5">
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Email</label>
+                        <input type="email" id="loginEmail" required 
+                               class="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent transition">
+                    </div>
+                    
+                    <div class="mb-6">
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Senha</label>
+                        <input type="password" id="loginPassword" required 
+                               class="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent transition">
+                    </div>
+                    
+                    <button type="submit" class="w-full btn btn-primary py-3 mb-4">
+                        <span id="loginButtonText">Entrar</span>
+                    </button>
+                </form>
+                
+                <div class="mt-6 text-center">
+                    <button id="showRegister" class="text-blue-600 hover:text-blue-800 font-medium transition">
+                        Não tem conta? Registre-se
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Register Screen -->
+        <div id="registerScreen" class="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-50 to-indigo-100 p-4 hidden">
+            <div class="w-full max-w-md bg-white rounded-2xl shadow-xl p-8 fade-in">
+                <div class="text-center mb-8">
+                    <div class="mx-auto bg-gradient-to-r from-green-500 to-teal-600 rounded-2xl p-4 w-16 h-16 flex items-center justify-center mb-4">
+                        <i class="fas fa-user-plus text-white text-2xl"></i>
+                    </div>
+                    <h1 class="text-3xl font-bold text-gray-900">Registrar</h1>
+                    <p class="mt-2 text-gray-600">Crie sua conta no MoneyMoney</p>
+                </div>
+                
+                <form id="registerForm">
+                    <div class="mb-5">
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Email</label>
+                        <input type="email" id="registerEmail" required 
+                               class="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent transition">
+                    </div>
+                    
+                    <div class="mb-5">
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Senha</label>
+                        <input type="password" id="registerPassword" required 
+                               class="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent transition">
+                    </div>
+                    
+                    <div class="mb-6">
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Código de Convite (Opcional)</label>
+                        <input type="text" id="inviteCode" 
+                               class="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent transition"
+                               placeholder="Digite o código de convite">
+                    </div>
+                    
+                    <button type="submit" class="w-full btn btn-primary py-3 mb-4">
+                        <span id="registerButtonText">Registrar</span>
+                    </button>
+                </form>
+                
+                <div class="mt-6 text-center">
+                    <button id="showLogin" class="text-blue-600 hover:text-blue-800 font-medium transition">
+                        Já tem conta? Faça login
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- User Dashboard -->
+        <div id="userDashboard" class="hidden">
+            <!-- Header -->
+            <header class="bg-white shadow-sm sticky top-0 z-10">
+                <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                    <div class="flex justify-between h-16 items-center">
+                        <div class="flex items-center">
+                            <div class="bg-gradient-to-r from-blue-500 to-purple-600 rounded-xl p-2 mr-3">
+                                <i class="fas fa-chart-line text-white text-xl"></i>
+                            </div>
+                            <h1 class="text-xl font-bold text-gray-900">MoneyMoney</h1>
+                        </div>
+                        
+                        <div class="flex items-center space-x-4">
+                            <span id="userEmail" class="text-gray-700 hidden sm:block"></span>
+                            <button id="logoutBtn" class="btn btn-danger py-2 px-4">
+                                <i class="fas fa-sign-out-alt mr-2"></i>Sair
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </header>
+
+            <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
                 <!-- User Panel -->
                 <div class="card p-6 mb-8">
                     <h2 class="section-title">Painel do Usuário</h2>
