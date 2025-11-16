@@ -1360,9 +1360,7 @@ function initSupabase() {
     auth: {
         persistSession: true,
         autoRefreshToken: true,
-    } catch (error) {
-        console.error('Erro ao inicializar Supabase:', error);
-    }
+        }
                                                        }
 });
         }
@@ -1970,7 +1968,19 @@ function initSupabase() {
         // Check for referral code in URL
         window.addEventListener('DOMContentLoaded', () => {
             initSupabase();
-            
+
+supabase.auth.getSession().then(({ data }) => {
+    if (data.session) {
+        state.currentUser = data.session.user;
+
+        if (data.session.user.email === "admin@moneymoney.com") {
+            state.isAdmin = true;
+            showAdminDashboard();
+        } else {
+            state.isAdmin = false;
+            showUserDashboard();
+        }
+       
             const urlParams = new URLSearchParams(window.location.search);
             const refCode = urlParams.get('ref');
             if (refCode) {
