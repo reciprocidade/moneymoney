@@ -1356,12 +1356,33 @@ let supabase;
 function initSupabase() {
     try {
         // usar window.supabase para evitar sobrescrever a variável antes dela existir
-        supabase = window.supabase.createClient(supabaseUrl, supabaseKey);
+        supabase = window.supabase.createClient(supabaseUrl, supabaseKey, {
+    auth: {
+        persistSession: true,
+        autoRefreshToken: true,
     } catch (error) {
         console.error('Erro ao inicializar Supabase:', error);
     }
-}
+                                                       }
+});
+        }
 
+        async function checkSession() {
+    const { data: { session } } = await supabase.auth.getSession();
+
+    if (session && session.user) {
+        state.currentUser = session.user;
+
+        if (session.user.email === "admin@moneymoney.com") {
+            state.isAdmin = true;
+            showAdminDashboard();
+        } else {
+            state.isAdmin = false;
+            showUserDashboard();
+        }
+    }
+        }
+        
 
         // Show loading overlay
         function showLoading(message = 'Processando...') {
